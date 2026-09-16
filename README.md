@@ -23,6 +23,7 @@ services:
       - RSYNC_DIR: /data/my-rsync-dir
     volumes:
       - my-shared-data:/data
+      - my-ssh-config:/etc/ssh
     ports:
       - "127.0.0.1:2222:22"
     networks:
