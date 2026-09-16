@@ -17,17 +17,15 @@ services:
   rsync:
     image: ghcr.io/william-stacken/rsync-server:latest
     environment:
-      - RSYNC_USER: rsync
-      - RSYNC_PUBLIC_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIDO2tvIOSuhNvK7fkE7gAkUXPbFa5hRujmnH0G1Wdy0 only-used-for-testing
-      - RSYNC_FLAGS: -wo
-      - RSYNC_DIR: /data/my-rsync-dir
+      RSYNC_USER: rsync
+      RSYNC_PUBLIC_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIDO2tvIOSuhNvK7fkE7gAkUXPbFa5hRujmnH0G1Wdy0 only-used-for-testing
+      RSYNC_FLAGS: -wo
+      RSYNC_DIR: /data/my-rsync-dir
     volumes:
       - my-shared-data:/data
       - my-ssh-config:/etc/ssh
     ports:
       - "127.0.0.1:2222:22"
-    networks:
-      - obcsw-sil
 ```
 The client can upload files (if permitted by the `$RSYNC_FLAGS`) using this command:
 ```sh
