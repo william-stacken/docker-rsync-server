@@ -1,0 +1,27 @@
+services:
+  rsync-server:
+    build:
+      context: ../src
+      dockerfile: Dockerfile
+    environment:
+      RSYNC_USER: rsyncuser
+      RSYNC_FLAGS: -wo -no-overwrite
+      RSYNC_PUBLIC_KEY: ${RSYNC_PUBLIC_KEY}
+    volumes:
+      - ./etc/local:/etc/ssh
+      - data:/data
+    ports:
+      - "2222:22"
+
+  web-server:
+    image: nginx
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - data:/usr/share/nginx/html
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - rsync-server
+
+volumes:
+  data:

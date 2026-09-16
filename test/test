@@ -1,0 +1,28 @@
+#!/bin/sh
+
+SCRIPTDIR="$(cd "$(dirname "$0")/"; pwd -P)"
+KEY_PATH="$SCRIPTDIR/keys/id_ed25519"
+
+assert_equal() {
+    if [ "$1" != "$2" ]; then
+        echo "Assertion failed: $1 != $2"
+        exit 1
+    fi
+}
+
+# PTY allocation should be disabled
+ssh -o "IdentitiesOnly=yes" -i "$KEY_PATH" rsyncuser@localhost -p 2222
+assert_equal "$?" 1
+
+# Command invocations should be disabled
+ssh -o "IdentitiesOnly=yes" -i "$KEY_PATH" rsyncuser@localhost -p 2222 whoami
+assert_equal "$?" 1
+
+# RSYNC_FLAGS should be respected
+rsync -avze "ssh -i "$KEY_PATH" -o IdentitiesOnly=yes -p 2222" rsyncuser@localhost: mydir
+assert_equal "$?" 12
+
+# Upload should work
+rsync -avze "ssh -i "$KEY_PATH" -o IdentitiesOnly=yes -p 2222" "$SCRIPTDIR/keys/" rsyncuser@localhost:
+FILE=$(curl --fail-with-body --silent http://localhost:8080/ | grep -o "id_ed25519.pub" | head -n 1)
+assert_equal "$FILE" id_ed25519.pub
