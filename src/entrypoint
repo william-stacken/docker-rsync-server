@@ -1,0 +1,32 @@
+#!/bin/sh -ue
+
+echo "GatewayPorts no" > /etc/ssh/sshd_config
+echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+echo "X11Forwarding no" >> /etc/ssh/sshd_config
+echo "AuthorizedKeysFile .ssh/authorized_keys" >> /etc/ssh/sshd_config
+
+if id "$RSYNC_USER" >/dev/null 2>&1; then
+    # Delete the user in case the container restarted, for idempotency
+    deluser --remove-home "$RSYNC_USER" 2>/dev/null
+fi
+
+adduser "$RSYNC_USER" -h "/home/$RSYNC_USER" -D
+# Passwordless users cannot be logged into even with public key authentication.
+# But this can appearently be bypassed by adding an asterisk to /etc/passwd
+sed -i "s/$RSYNC_USER:!:/$RSYNC_USER:*:/" /etc/shadow
+
+mkdir -m 700 -p "/home/$RSYNC_USER/.ssh"
+echo "restrict,port-forwarding,command=\"/usr/bin/rrsync $RSYNC_FLAGS /data\" $RSYNC_PUBLIC_KEY" \
+    > "/home/$RSYNC_USER/.ssh/authorized_keys"
+chmod 600 "/home/$RSYNC_USER/.ssh/authorized_keys"
+
+chown -R "$RSYNC_USER:$RSYNC_USER" "/home/$RSYNC_USER/.ssh"
+
+mkdir -m 700 -p /data
+chown -R "$RSYNC_USER:$RSYNC_USER" "/data"
+
+# Generate host keys if they don't exist
+ssh-keygen -A
+
+exec /usr/sbin/sshd -D "$@"
