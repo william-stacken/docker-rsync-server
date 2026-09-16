@@ -24,5 +24,5 @@ assert_equal "$?" 12
 
 # Upload should work
 rsync -avze "ssh -i "$KEY_PATH" -o IdentitiesOnly=yes -p 2222" "$SCRIPTDIR/keys/" rsyncuser@localhost:
-FILE=$(curl --fail-with-body --silent http://localhost:8080/ | grep -o "id_ed25519.pub" | head -n 1)
+FILE=$(curl --fail-with-body --silent http://localhost:8080/rsync/ | grep -o "id_ed25519.pub" | head -n 1)
 assert_equal "$FILE" id_ed25519.pub
