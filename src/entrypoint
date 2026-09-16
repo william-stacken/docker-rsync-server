@@ -17,14 +17,14 @@ adduser "$RSYNC_USER" -h "/home/$RSYNC_USER" -D
 sed -i "s/$RSYNC_USER:!:/$RSYNC_USER:*:/" /etc/shadow
 
 mkdir -m 700 -p "/home/$RSYNC_USER/.ssh"
-echo "restrict,port-forwarding,command=\"/usr/bin/rrsync $RSYNC_FLAGS /data\" $RSYNC_PUBLIC_KEY" \
+echo "restrict,port-forwarding,command=\"/usr/bin/rrsync $RSYNC_FLAGS $RSYNC_DIR\" $RSYNC_PUBLIC_KEY" \
     > "/home/$RSYNC_USER/.ssh/authorized_keys"
 chmod 600 "/home/$RSYNC_USER/.ssh/authorized_keys"
 
 chown -R "$RSYNC_USER:$RSYNC_USER" "/home/$RSYNC_USER/.ssh"
 
-mkdir -m 700 -p /data
-chown -R "$RSYNC_USER:$RSYNC_USER" "/data"
+mkdir -p "$RSYNC_DIR"
+chown -R "$RSYNC_USER:$RSYNC_USER" "$RSYNC_DIR"
 
 # Generate host keys if they don't exist
 ssh-keygen -A

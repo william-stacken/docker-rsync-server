@@ -7,6 +7,7 @@ services:
       RSYNC_USER: rsyncuser
       RSYNC_FLAGS: -wo -no-overwrite
       RSYNC_PUBLIC_KEY: ${RSYNC_PUBLIC_KEY}
+      RSYNC_DIR: /data/rsync
     volumes:
       - ./etc/local:/etc/ssh
       - data:/data
